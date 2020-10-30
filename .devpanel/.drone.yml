@@ -1,0 +1,42 @@
+kind: pipeline
+type: kubernetes
+name: Apply infrastructure
+steps:
+  - name: Planing new Infra...
+    image: "devpanel/tasks-base"
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: AWS_SECRET_ACCESS_KEY
+    commands:
+      - terraform init
+      - terraform plan
+    when:
+      branch:
+        - master
+      event:
+        - pull_request
+      action:
+        - opened
+        - reopened
+  - name: Apply new Infra...
+    image: "devpanel/tasks-base"
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: AWS_SECRET_ACCESS_KEY
+    commands:
+      - terraform init
+      - terraform apply
+    when:
+      branch:
+        - master
+      event:
+        - pull_request
+      action:
+        - merged
+        - synchronized
+image_pull_secrets:
+  - dockerconfig
